@@ -1,34 +1,42 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Build .NET MAUI App Android
+name: Build .NET MAUI App windows
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
+    - name: Checkout
     - uses: actions/checkout@v3
+    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x
+        
     - name: Install .NET MAUI
       run: dotnet workload install maui
+      
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ./WordleApp
+      
     - name: Build
-      run: dotnet build MauiGithubActionsSample/MauiGithubActionsSample.csproj -c Release -f net6.0-android /p:AndroidSigningKeyStore=myapp.keystore /p:AndroidSigningKeyAlias=ghactionskey /p:AndroidSigningKeyPass="${{ secrets.KEYSTORE_PASSWORD }}" /p:AndroidSigningStorePass="${{ secrets.KEYSTORE_PASSWORD_ALIAS }}" --no-restore
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.0
+      run: dotnet build -c Release -f:net8.0-windows10.0.19041.0
+      working-directory: ./WordleApp
+    
+    - name: Publish
+      run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true
+      working-directory: ./WordleApp
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
-        path: |
-          ./**/*.aab
-          ./**/*.apk
+        name: Build
+        path: ./WordleApp/bin/Release/net8.0-windows10.0.19041/win10-x64/AppPackages/**/*.msix
