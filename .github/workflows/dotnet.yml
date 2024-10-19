@@ -14,7 +14,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
+      
+    - name: Extract Signing Key
+      run: |
+        echo "${{ secrets.SIGNINGCERT }}"
+        $newBytes = [System.Convert]::FromBase64String(${{ secrets.SIGNINGCERT }})
+        [io.file]::WriteAllBytes('./WordleApp/WordleApp_TemporaryKey.pfx', $newBytes)
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -30,7 +36,8 @@ jobs:
     - name: Extract Signing Key
       run: |
         echo "${{ secrets.SIGNINGCERT }}"
-        echo "${{ secrets.SIGNINGCERT }}" | base64 --decode > ./WordleApp/WordleApp_TemporaryKey.pfx
+        $newBytes = [System.Convert]::FromBase64String(${{ secrets.SIGNINGCERT }})
+        [io.file]::WriteAllBytes('./WordleApp/WordleApp_TemporaryKey.pfx', $newBytes)
       
     - name: Build
       run: dotnet build -c Release -f:net8.0-windows10.0.19041.0
