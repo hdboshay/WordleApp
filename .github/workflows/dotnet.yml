@@ -27,15 +27,15 @@ jobs:
       run: dotnet restore
       working-directory: ./WordleApp
       
+    - name: Extract Signing Key
+      run: |
+        echo "${{ secrets.SIGNINGCERT }}"
+        echo "${{ secrets.SIGNINGCERT }}" | base64 --decode > ./WordleApp/WordleApp_TemporaryKey.pfx
+      
     - name: Build
       run: dotnet build -c Release -f:net8.0-windows10.0.19041.0
       working-directory: ./WordleApp
     
-    - name: Extract Signing Key
-      env: 
-        CERT: ${{ secrets.SIGNINGCERT }}
-      run: echo "$CERT" | base64 --decode > ./WordleApp/WordleApp_TemporaryKey.pfx
-      
     - name: Publish
       run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true
       working-directory: ./WordleApp
